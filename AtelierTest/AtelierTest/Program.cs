@@ -42,6 +42,16 @@ using (var scope = app.Services.CreateScope())
 app.MapOpenApi();
 app.MapScalarApiReference();
 
+if (app.Environment.IsDevelopment())
+{
+    // Swagger UI, servie en local à partir du document OpenAPI déjà généré ci-dessus.
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "AtelierTest API v1");
+        options.RoutePrefix = "swagger";
+    });
+}
+
 app.UseAuthorization();
 
 app.MapControllers();
