@@ -1,0 +1,16 @@
+## .NET
+bin/
+obj/
+*.user
+
+## Visual Studio
+.vs/
+
+## SQLite runtime databases
+*.db
+*.db-shm
+*.db-wal
+
+## Publish output
+publish/
+*.zip

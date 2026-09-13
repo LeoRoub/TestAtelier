@@ -1,0 +1,68 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build, test and deploy to Azure Web App - atelier-tennis-api
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Restore solution
+        run: dotnet restore AtelierTest/AtelierTest.slnx
+
+      - name: Build
+        run: dotnet build AtelierTest/AtelierTest.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test AtelierTest/AtelierTest.slnx --configuration Release --no-build
+
+      - name: Publish
+        run: dotnet publish AtelierTest/AtelierTest/AtelierTest.csproj --configuration Release --no-build -o ./publish
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ./publish
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+          path: ./publish
+
+      - name: Zip published files
+        run: |
+          cd publish
+          zip -r ../app.zip .
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'atelier-tennis-api'
+          slot-name: 'Production'
+          package: ./app.zip
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
