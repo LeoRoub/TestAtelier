@@ -100,6 +100,7 @@ public class CreateDataDto
     [Range(0, 150)]
     public int Age { get; set; }
 
+    [BinaryResults]
     public List<int> Last { get; set; } = [];
 }
 
@@ -109,4 +110,18 @@ public class StatisticsDto
     public double? BestWinRatio { get; set; }
     public double? AverageBmi { get; set; }
     public double? MedianHeight { get; set; }
+}
+
+/// <summary>Valide que chaque entrée est 0 (défaite) ou 1 (victoire).</summary>
+public sealed class BinaryResultsAttribute : ValidationAttribute
+{
+    public BinaryResultsAttribute()
+    {
+        ErrorMessage = "Each entry in Last must be 0 (loss) or 1 (win).";
+    }
+
+    public override bool IsValid(object? value)
+    {
+        return value is not List<int> results || results.All(result => result is 0 or 1);
+    }
 }
